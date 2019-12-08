@@ -1,39 +1,45 @@
-const fs = require('fs')
-const readline = require('readline')
+const { fileLinesToArray } = require('../common')
+const {
+  __,
+  always,
+  identity,
+  compose,
+  add,
+  subtract,
+  divide,
+  reduce,
+  ifElse,
+  gt
+} = require('ramda')
 
-const fileLinesToArray = async path => {
-    const fileStream = fs.createReadStream(path);
-  
-    const rl = readline.createInterface({
-      input: fileStream,
-      crlfDelay: Infinity
-    })
+const input = fileLinesToArray(__dirname + '/inputday1.txt')
 
-    const results = []
+// part 1
 
-    for await (const line of rl) {
-      results.push(line)
-    }
+const fuelForMass = compose(
+  subtract(__, 2),
+  Math.floor,
+  divide(__, 3)
+)
 
-    return results
-}
+// non ramda-version:
+// const fuelForMass = mass => Math.floor(mass / 3) - 2
 
-const calc = mass => Math.floor(mass / 3) - 2
+const part1Answer = reduce(
+  (acc, curr) => add(acc, fuelForMass(curr)), 0)
+  (input)
 
-const input = await fileLinesToArray('./day1/inputday1.txt')
+console.log(`Part 1 answer: ${part1Answer}`)
 
-const firstCalculation = input.reduce((acc, curr) => acc + calc(curr), 0)
+// part 2
 
-firstCalculation // result part 1
+const recursiveFuelCount = ifElse(
+  gt(__, 0),
+  val => fuelForMass(val) + recursiveFuelCount(fuelForMass(val)),
+  always(0)
+)
 
-const recursiveFuelCount = mass => {
-    const calculated = calc(mass)
-    return calculated > 0
-        ? calculated + recursiveFuelCount(calculated)
-        : 0
-}
+const part2Answer = input.reduce((acc, curr) =>
+  acc + recursiveFuelCount(curr), 0)
 
-const secondCalculation = input.reduce((acc, curr) => 
-    acc + recursiveFuelCount(Number(curr)), 0)
-
-secondCalculation // result part 2
+console.log(`Part 2 answer: ${part2Answer}`)
