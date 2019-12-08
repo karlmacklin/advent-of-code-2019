@@ -2,14 +2,15 @@ const { fileLinesToArray } = require('../common')
 const {
   __,
   always,
-  identity,
   compose,
   add,
   subtract,
   divide,
   reduce,
   ifElse,
-  gt
+  gt,
+  converge,
+  o
 } = require('ramda')
 
 const input = fileLinesToArray(__dirname + '/inputday1.txt')
@@ -35,11 +36,15 @@ console.log(`Part 1 answer: ${part1Answer}`)
 
 const recursiveFuelCount = ifElse(
   gt(__, 0),
-  val => fuelForMass(val) + recursiveFuelCount(fuelForMass(val)),
+  converge(add, [
+    fuelForMass,
+    o(a => recursiveFuelCount(a), fuelForMass)
+  ]),
   always(0)
 )
 
-const part2Answer = input.reduce((acc, curr) =>
-  acc + recursiveFuelCount(curr), 0)
+const part2Answer = reduce(
+  (acc, curr) => acc + recursiveFuelCount(curr), 0)
+  (input)
 
 console.log(`Part 2 answer: ${part2Answer}`)
